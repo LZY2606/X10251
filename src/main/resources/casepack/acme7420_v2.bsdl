@@ -1,0 +1,25 @@
+-- ACME7420 boundary scan description, revision 2.0 (pin remap for spin B)
+entity ACME7420 is
+  generic (PHYSICAL_PIN_MAP : string := "TQFP48");
+  port (D0: in bit; D1: in bit; D2: in bit; D3: in bit;
+        Q0: out bit; Q1: out bit; Q2: out bit; Q3: out bit;
+        OE_N: in bit; CLK: in bit);
+  attribute INSTRUCTION_LENGTH of ACME7420 : entity is 4;
+  attribute IDCODE_REGISTER of ACME7420 : entity is
+    "00001010110001110100001000000001";
+  attribute PIN_MAP of ACME7420 : entity is PHYSICAL_PIN_MAP;
+  constant TQFP48 : PIN_MAP_STRING :=
+    "D0: 5, D1: 6, D2: 7, D3: 8, Q0: 13, Q1: 14, Q2: 15, Q3: 16, OE_N: 22, CLK: 23";
+  attribute BOUNDARY_LENGTH of ACME7420 : entity is 10;
+  attribute BOUNDARY_REGISTER of ACME7420 : entity is
+    " 0 (BC_1, D0, input, X)," &
+    " 1 (BC_1, D1, input, X)," &
+    " 2 (BC_1, D2, input, X)," &
+    " 3 (BC_1, D3, input, X)," &
+    " 4 (BC_1, Q0, output3, X)," &
+    " 5 (BC_1, Q1, output3, X)," &
+    " 6 (BC_1, Q2, output3, X)," &
+    " 7 (BC_1, Q3, output3, X)," &
+    " 8 (BC_1, OE_N, control, 1)," &
+    " 9 (BC_1, CLK, observe_only, X)";
+end ACME7420;

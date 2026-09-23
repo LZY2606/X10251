@@ -1,0 +1,5 @@
+[
+  { "perDeviceBits": [4, 5, 4], "rationale": "three populated devices, per-BSDL IR lengths (U4 missing)" },
+  { "perDeviceBits": [8, 5],    "rationale": "hypothesis: U1 site holds an 8-bit-IR second-source part" },
+  { "perDeviceBits": [13],      "rationale": "hypothesis: single-device chain (mechanical bypass of two sites)" }
+]

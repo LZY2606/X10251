@@ -1,0 +1,9 @@
+{
+  "label": "revA-2026-08",
+  "slots": [
+    { "position": 0, "name": "U3", "bsdlRef": "ACME7420" },
+    { "position": 1, "name": "U2", "bsdlRef": "ORION90" },
+    { "position": 2, "name": "U1", "bsdlRef": "ACME7420" },
+    { "position": 3, "name": "U4", "bsdlRef": "ORION90" }
+  ]
+}

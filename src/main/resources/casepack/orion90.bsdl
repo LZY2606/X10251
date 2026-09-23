@@ -1,0 +1,18 @@
+-- ORION90 boundary scan description, revision 1.0
+entity ORION90 is
+  generic (PHYSICAL_PIN_MAP : string := "BGA64");
+  port (A0: in bit; A1: in bit; Y0: out bit; Y1: out bit; MODE: in bit);
+  attribute INSTRUCTION_LENGTH of ORION90 : entity is 5;
+  attribute IDCODE_REGISTER of ORION90 : entity is
+    "00010011010101110000111100000001";
+  attribute PIN_MAP of ORION90 : entity is PHYSICAL_PIN_MAP;
+  constant BGA64 : PIN_MAP_STRING :=
+    "A0: B2, A1: C4, Y0: D5, Y1: E1, MODE: F7";
+  attribute BOUNDARY_LENGTH of ORION90 : entity is 5;
+  attribute BOUNDARY_REGISTER of ORION90 : entity is
+    " 0 (BC_1, A0, input, X)," &
+    " 1 (BC_1, A1, input, X)," &
+    " 2 (BC_1, Y0, output2, 0)," &
+    " 3 (BC_1, Y1, output2, 0)," &
+    " 4 (BC_4, MODE, observe_only, X)";
+end ORION90;

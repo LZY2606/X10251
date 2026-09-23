@@ -1,0 +1,21 @@
+# Capture script for board revA, probe main @ 1.8V.
+# One op per line. shift specs: bits:<01..>, idcode:<hex8>, bypass, zeros:<n>, ones:<n>
+# tdoFall overrides TDO at the falling phase (polarity sensitivity probe).
+reset
+idle
+to_shift_ir
+shift tdi=bits:1001100101001 tdo=bits:10xxxxxxxxxxx
+update
+idle
+to_shift_dr
+shift tdi=zeros:65 tdo=idcode:0AC74201,bypass,idcode:0AC74201 tdofall=idcode:0AC74281,bypass,idcode:0AC74201
+update
+idle
+to_shift_dr
+shift tdi=ones:10 tdo=bits:0110100101
+midreset
+idle
+to_shift_dr
+shift tdi=zeros:65 tdo=idcode:0AC74201,bypass,idcode:0AC74201
+update
+idle
