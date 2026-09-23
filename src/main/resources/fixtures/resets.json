@@ -1,0 +1,3 @@
+[
+  {"cycle": 20, "kind": "TRST_PULSE", "detail": "TRST asserted by debugger mid-session"}
+]

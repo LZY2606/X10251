@@ -1,0 +1,6 @@
+[
+  {"position": 0, "length": 8, "source": "BSDL", "rationale": "U1 BSDL v1 declares INSTRUCTION_LENGTH 8"},
+  {"position": 1, "length": 6, "source": "MANUAL", "rationale": "debugger script assumed 6-bit IR"},
+  {"position": 1, "length": 8, "source": "BSDL", "rationale": "U2_BYPASS BSDL declares INSTRUCTION_LENGTH 8"},
+  {"position": 2, "length": 8, "source": "IDCODE_HEURISTIC", "rationale": "captured IDCODE pattern suggests 8; insufficient alone"}
+]
