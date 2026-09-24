@@ -1,0 +1,409 @@
+{
+  "pack": "chain-map-case",
+  "title": "扫描链图：JTAG TAP 转移、边界扫描单元与器件映射",
+  "narrative": "板级调试小组导入 TMS/TCK/TDI/TDO 采样和 BSDL 版本，重建 TAP 状态、instruction/data register 和扫描链单元",
+  "baseline": {
+    "note": "初始导入：采样边沿、复位事件、IR 长度候选、BSDL 引脚映射与板卡修订分开存储",
+    "parameters": [
+      {
+        "key": "param:tck_polarity",
+        "value": "rising"
+      }
+    ],
+    "stream": {
+      "timeUnit": "ns",
+      "stepNs": 50,
+      "oddTimeEdges": [
+        {
+          "index": 7,
+          "raw": "3",
+          "unit": "cycles"
+        }
+      ],
+      "tms": "1111101000000000000000000000000000000000000000000000000000000000000000001101100000000000001101000110",
+      "tdi": "0000000000000000000000000000000000000000000000000000000000000000000000000000000111111111111000000000",
+      "tdo": "0000000001000000000000000000011010000010010000000000000000000010100001000000000010101010101000000000"
+    },
+    "resets": [],
+    "irCandidates": [
+      {
+        "devicePosition": 0,
+        "lengthBits": 4,
+        "source": "BSDL"
+      },
+      {
+        "devicePosition": 1,
+        "lengthBits": 8,
+        "source": "BSDL"
+      },
+      {
+        "devicePosition": 1,
+        "lengthBits": 4,
+        "source": "IDCODE_HINT"
+      }
+    ],
+    "bsdlMappings": [
+      {
+        "device": "fpga",
+        "devicePosition": 0,
+        "version": "1.0",
+        "cells": [
+          {
+            "cell": 0,
+            "port": "DATA_IN",
+            "pin": {
+              "raw": "A1",
+              "unit": "ball-grid"
+            },
+            "function": "INPUT"
+          },
+          {
+            "cell": 1,
+            "port": "DATA_OUT",
+            "pin": {
+              "raw": "A2",
+              "unit": "ball-grid"
+            },
+            "function": "OUTPUT3"
+          },
+          {
+            "cell": 2,
+            "port": "CTRL",
+            "pin": {
+              "raw": "B1",
+              "unit": "ball-grid"
+            },
+            "function": "CONTROL"
+          }
+        ]
+      }
+    ],
+    "boardRevision": {
+      "rev": "A",
+      "devices": [
+        {
+          "position": 0,
+          "name": "fpga",
+          "idcode": "0x10A00001",
+          "irLength": 4
+        },
+        {
+          "position": 1,
+          "name": "cpld",
+          "idcode": "0x20B00001",
+          "irLength": null
+        }
+      ]
+    }
+  },
+  "stages": [
+    {
+      "name": "param-revision",
+      "kind": "parameter",
+      "note": "参数修订：TCK 采样极性 rising -> falling",
+      "parameter": {
+        "key": "param:tck_polarity",
+        "value": "falling"
+      },
+      "expectAffected": [
+        "tap_trace",
+        "shift_segment",
+        "device_chain",
+        "cell_pin_evidence"
+      ]
+    },
+    {
+      "name": "mapping-change",
+      "kind": "bsdl",
+      "note": "只影响局部依赖的源数据改动：BSDL 1.0 -> 1.1（DATA_OUT 引脚 A2 -> A3）",
+      "bsdlMapping": {
+        "device": "fpga",
+        "devicePosition": 0,
+        "version": "1.1",
+        "cells": [
+          {
+            "cell": 0,
+            "port": "DATA_IN",
+            "pin": {
+              "raw": "A1",
+              "unit": "ball-grid"
+            },
+            "function": "INPUT"
+          },
+          {
+            "cell": 1,
+            "port": "DATA_OUT",
+            "pin": {
+              "raw": "A3",
+              "unit": "ball-grid"
+            },
+            "function": "OUTPUT3"
+          },
+          {
+            "cell": 2,
+            "port": "CTRL",
+            "pin": {
+              "raw": "B1",
+              "unit": "ball-grid"
+            },
+            "function": "CONTROL"
+          }
+        ]
+      },
+      "expectAffected": [
+        "cell_pin_evidence"
+      ]
+    },
+    {
+      "name": "conflicting-decisions",
+      "kind": "manual-decision",
+      "note": "互相冲突的人工决定：alice 采纳 cpld IR=8，bob 采纳 cpld IR=4，二者基于同一版本",
+      "decisions": [
+        {
+          "reviewer": "alice",
+          "candidate": {
+            "devicePosition": 1,
+            "lengthBits": 8,
+            "source": "MANUAL",
+            "adopted": true
+          }
+        },
+        {
+          "reviewer": "bob",
+          "candidate": {
+            "devicePosition": 1,
+            "lengthBits": 4,
+            "source": "MANUAL",
+            "adopted": true
+          }
+        }
+      ],
+      "resolve": "alice"
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "mid-scan-reset",
+      "summary": "中途复位：TRST 落在 SHIFT_IR 中途，不得被静默跳过",
+      "override": {
+        "resets": [
+          {
+            "edgeIndex": 85,
+            "kind": "TRST"
+          }
+        ]
+      },
+      "expectEvents": [
+        "MidScanReset"
+      ],
+      "expectAffected": [
+        "tap_trace",
+        "shift_segment",
+        "device_chain",
+        "cell_pin_evidence"
+      ]
+    },
+    {
+      "name": "ir-length-ambiguity",
+      "summary": "IR 长度多解：(4,8) 与 (8,4) 均满足观测长度 12，全部保留",
+      "override": {
+        "irCandidates": [
+          {
+            "devicePosition": 0,
+            "lengthBits": 4,
+            "source": "BSDL"
+          },
+          {
+            "devicePosition": 0,
+            "lengthBits": 8,
+            "source": "MANUAL"
+          },
+          {
+            "devicePosition": 1,
+            "lengthBits": 8,
+            "source": "BSDL"
+          },
+          {
+            "devicePosition": 1,
+            "lengthBits": 4,
+            "source": "MANUAL"
+          }
+        ]
+      },
+      "expectEvents": [
+        "IrLengthAmbiguous"
+      ],
+      "expectAffected": [
+        "device_chain",
+        "cell_pin_evidence"
+      ]
+    },
+    {
+      "name": "bypass-device",
+      "summary": "bypass 器件：3 器件链 DR 段长 3，全部处于 BYPASS",
+      "override": {
+        "stream": {
+          "timeUnit": "ns",
+          "stepNs": 50,
+          "oddTimeEdges": [],
+          "tms": "11111010000110",
+          "tdi": "00000000000000",
+          "tdo": "00000000000000"
+        },
+        "boardRevision": {
+          "rev": "C",
+          "devices": [
+            {
+              "position": 0,
+              "name": "fpga",
+              "idcode": "0x10A00001",
+              "irLength": 4
+            },
+            {
+              "position": 1,
+              "name": "cpld",
+              "idcode": "0x20B00001",
+              "irLength": 8
+            },
+            {
+              "position": 2,
+              "name": "flash",
+              "idcode": null,
+              "irLength": 6
+            }
+          ]
+        }
+      },
+      "expectEvents": [
+        "BypassDeviceInferred"
+      ],
+      "expectAffected": [
+        "tap_trace",
+        "shift_segment",
+        "device_chain",
+        "cell_pin_evidence"
+      ]
+    },
+    {
+      "name": "missing-device",
+      "summary": "链上缺件：板卡修订 B 列 3 件，IDCODE 只读回 2 件，保留偏移候选",
+      "override": {
+        "boardRevision": {
+          "rev": "B",
+          "devices": [
+            {
+              "position": 0,
+              "name": "fpga",
+              "idcode": "0x10A00001",
+              "irLength": 4
+            },
+            {
+              "position": 1,
+              "name": "flash",
+              "idcode": "0x30C00001",
+              "irLength": 6
+            },
+            {
+              "position": 2,
+              "name": "cpld",
+              "idcode": "0x20B00001",
+              "irLength": 8
+            }
+          ]
+        }
+      },
+      "expectEvents": [
+        "ChainDeviceMissing"
+      ],
+      "expectAffected": [
+        "device_chain",
+        "cell_pin_evidence"
+      ]
+    },
+    {
+      "name": "sampling-polarity",
+      "summary": "采样极性：TCK 极性改为 falling，TDO 对齐平移一边沿",
+      "override": {
+        "parameters": [
+          {
+            "key": "param:tck_polarity",
+            "value": "falling"
+          }
+        ]
+      },
+      "expectEvents": [
+        "PolarityApplied"
+      ],
+      "expectAffected": [
+        "tap_trace",
+        "shift_segment",
+        "device_chain",
+        "cell_pin_evidence"
+      ]
+    },
+    {
+      "name": "illegal-transition",
+      "summary": "非法转移：TDO 在非移位状态发生翻转，不得被静默跳过",
+      "override": {
+        "streamTdo": "0000010001000000000000000000011010000010010000000000000000000010100001000000000010101010101000000000"
+      },
+      "expectEvents": [
+        "IllegalTransition"
+      ],
+      "expectAffected": [
+        "tap_trace",
+        "shift_segment",
+        "device_chain",
+        "cell_pin_evidence"
+      ]
+    },
+    {
+      "name": "mapping-version-change",
+      "summary": "映射版本变更：BSDL 1.0 -> 1.1，仅 cell_pin_evidence 需要重算",
+      "override": {
+        "bsdlMappings": [
+          {
+            "device": "fpga",
+            "devicePosition": 0,
+            "version": "1.1",
+            "cells": [
+              {
+                "cell": 0,
+                "port": "DATA_IN",
+                "pin": {
+                  "raw": "A1",
+                  "unit": "ball-grid"
+                },
+                "function": "INPUT"
+              },
+              {
+                "cell": 1,
+                "port": "DATA_OUT",
+                "pin": {
+                  "raw": "A3",
+                  "unit": "ball-grid"
+                },
+                "function": "OUTPUT3"
+              },
+              {
+                "cell": 2,
+                "port": "CTRL",
+                "pin": {
+                  "raw": "B1",
+                  "unit": "ball-grid"
+                },
+                "function": "CONTROL"
+              }
+            ]
+          }
+        ]
+      },
+      "expectEvents": [
+        "MappingVersionChanged"
+      ],
+      "expectAffected": [
+        "cell_pin_evidence"
+      ]
+    }
+  ]
+}
