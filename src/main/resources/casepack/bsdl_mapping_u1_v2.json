@@ -1,0 +1,32 @@
+{
+ "id": "bsdl-u1-v2",
+ "label": "u1 BSDL 引脚映射 v1.1",
+ "device": "u1",
+ "mappingVersion": "v1.1",
+ "cells": [
+  {
+   "cellIndex": 0,
+   "port": "PA0",
+   "pin": "A1",
+   "function": "OUTPUT2"
+  },
+  {
+   "cellIndex": 1,
+   "port": "PA1",
+   "pin": "B2",
+   "function": "INPUT"
+  },
+  {
+   "cellIndex": 2,
+   "port": "PA2",
+   "pin": "A3",
+   "function": "OUTPUT3"
+  },
+  {
+   "cellIndex": 3,
+   "port": "PA3",
+   "pin": "B4",
+   "function": "INPUT"
+  }
+ ]
+}

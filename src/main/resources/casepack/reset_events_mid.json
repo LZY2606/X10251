@@ -1,0 +1,10 @@
+{
+ "id": "resets-mid",
+ "label": "中途复位事件记录",
+ "events": [
+  {
+   "atEdgeIndex": 74,
+   "kind": "TRST_ASSERT"
+  }
+ ]
+}

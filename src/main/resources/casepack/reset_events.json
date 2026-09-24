@@ -1,0 +1,5 @@
+{
+ "id": "resets-base",
+ "label": "基线复位事件（无中途复位）",
+ "events": []
+}

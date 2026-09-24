@@ -1,0 +1,25 @@
+{
+ "id": "board-revA-bypass",
+ "label": "板卡修订 A(bypass 变体)",
+ "revision": "A(bypass 变体)",
+ "expectedDevices": [
+  {
+   "position": 0,
+   "name": "u1",
+   "idcode": "0x0A1B0001",
+   "bypassOnly": false
+  },
+  {
+   "position": 1,
+   "name": "u2",
+   "idcode": null,
+   "bypassOnly": true
+  },
+  {
+   "position": 2,
+   "name": "u3",
+   "idcode": "0x0C3D0001",
+   "bypassOnly": false
+  }
+ ]
+}

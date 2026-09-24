@@ -1,0 +1,41 @@
+{
+ "id": "replay-script-001",
+ "title": "板级调试小组：导入采样与 BSDL，重建 TAP/IR/DR/扫描链",
+ "steps": [
+  {
+   "n": 1,
+   "action": "seed",
+   "desc": "初始导入：采样边沿/复位事件/IR 长度候选/BSDL 映射/板卡修订分开存储"
+  },
+  {
+   "n": 2,
+   "action": "derive-base",
+   "desc": "基线推导：重建 TAP 轨迹、IR/DR 位流、三器件链与单元到引脚证据"
+  },
+  {
+   "n": 3,
+   "action": "param-revision",
+   "desc": "参数修订：选择 IR 长度 u1=4,u3=8 并切换 BSDL 映射到 v1.1，只重算受影响阶段"
+  },
+  {
+   "n": 4,
+   "action": "local-source-change",
+   "desc": "局部源数据改动：替换 IR 长度候选为多解版本，仅 CHAIN 阶段重算"
+  },
+  {
+   "n": 5,
+   "action": "conflicting-decisions",
+   "desc": "两位审阅者从同一版本给出互相冲突的决定，产生可解决冲突"
+  },
+  {
+   "n": 6,
+   "action": "branch-b",
+   "desc": "第二分支：检验中途复位/非法转移不被静默跳过、缺件保留偏移候选"
+  },
+  {
+   "n": 7,
+   "action": "review",
+   "desc": "最终复核：从 TAP 轨迹→位流→器件链→单元引脚证据路径接受/否定，生成新事件"
+  }
+ ]
+}

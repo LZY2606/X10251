@@ -1,0 +1,175 @@
+{
+ "id": "archive-jtag-001",
+ "title": "JTAG/边界扫描/TAP 反例档案：基线 + 单源变更",
+ "baseline": {
+  "sampleEdges": "edges-base",
+  "resetEvents": "resets-base",
+  "irCandidates": "ircand-base",
+  "bsdlMappings": [
+   "bsdl-u1-v1",
+   "bsdl-u3-v2"
+  ],
+  "boardRevision": "board-revA"
+ },
+ "cases": [
+  {
+   "name": "mid-reset",
+   "mutatedSource": "sample_edges",
+   "fixture": "sample_edges_midreset.json",
+   "resetFixture": "reset_events_mid.json",
+   "expectEvents": [
+    "MID_STREAM_RESET"
+   ],
+   "judgment": {
+    "rule": "非法 TAP 转移和中途复位不得被静默跳过",
+    "machineCheck": "events.any(kind==MID_STREAM_RESET)"
+   },
+   "accepted": {
+    "conclusion": "复位点之后重新同步，复位前段标记为作废但保留",
+    "hypothesis": "hyp-0"
+   },
+   "rejected": [
+    {
+     "conclusion": "静默跳过复位段、直接拼接位流",
+     "reason": "违反规则：中途复位必须显式记录"
+    }
+   ]
+  },
+  {
+   "name": "ir-length-ambiguous",
+   "mutatedSource": "ir_length_candidates",
+   "fixture": "ir_length_candidates_ambig.json",
+   "expectEvents": [
+    "IR_LENGTH_AMBIGUOUS"
+   ],
+   "judgment": {
+    "rule": "IR 长度不可仅靠 IDCODE 猜定",
+    "machineCheck": "hypotheses.count>1 && events.any(kind==IR_LENGTH_AMBIGUOUS)"
+   },
+   "accepted": {
+    "conclusion": "保留 (4,4,8) 与 (5,4,7) 两种合法分解",
+    "hypothesis": "all"
+   },
+   "rejected": [
+    {
+     "conclusion": "按 IDCODE 猜测取 5/7 长度",
+     "reason": "IDCODE 不含 IR 长度信息"
+    }
+   ]
+  },
+  {
+   "name": "bypass-device",
+   "mutatedSource": "board_revision",
+   "fixture": "board_revision_bypass.json",
+   "expectEvents": [
+    "BYPASS_DEVICE"
+   ],
+   "judgment": {
+    "rule": "bypass 器件 DR 贡献 1 位，需在链上显式标注",
+    "machineCheck": "devices.any(status==BYPASS_DEVICE)"
+   },
+   "accepted": {
+    "conclusion": "u2 标记 BYPASS，DR 预测长度改为 65 并记录与实测 96 的差异",
+    "hypothesis": "hyp-0"
+   },
+   "rejected": [
+    {
+     "conclusion": "忽略 bypass 位",
+     "reason": "会导致后续器件位流错位"
+    }
+   ]
+  },
+  {
+   "name": "missing-device",
+   "mutatedSource": "board_revision",
+   "fixture": "board_revision_missing.json",
+   "expectEvents": [
+    "MISSING_DEVICE"
+   ],
+   "judgment": {
+    "rule": "链上器件缺失时保留偏移候选",
+    "machineCheck": "hypotheses.all(status==MISSING_DEVICE) && offsetCandidates.nonEmpty"
+   },
+   "accepted": {
+    "conclusion": "保留 u4 缺失于位置 0..3 的全部偏移候选",
+    "hypothesis": "all"
+   },
+   "rejected": [
+    {
+     "conclusion": "任选一个偏移位置",
+     "reason": "无法唯一决定时必须保留全部合法候选"
+    }
+   ]
+  },
+  {
+   "name": "sampling-polarity",
+   "mutatedSource": "sample_edges",
+   "fixture": "sample_edges_polarity.json",
+   "paramsOverride": {
+    "polarityOverride": "RISING"
+   },
+   "expectEvents": [
+    "POLARITY_MISMATCH"
+   ],
+   "judgment": {
+    "rule": "采样极性以源记录为准，覆盖需显式记录",
+    "machineCheck": "events.any(kind==POLARITY_MISMATCH)"
+   },
+   "accepted": {
+    "conclusion": "记录极性覆盖事件，按覆盖后极性重建",
+    "hypothesis": "hyp-0"
+   },
+   "rejected": [
+    {
+     "conclusion": "悄悄按 FALLING 处理",
+     "reason": "极性差异必须可见"
+    }
+   ]
+  },
+  {
+   "name": "illegal-transition",
+   "mutatedSource": "sample_edges",
+   "fixture": "sample_edges_glitch.json",
+   "expectEvents": [
+    "ILLEGAL_TRANSITION"
+   ],
+   "judgment": {
+    "rule": "非法 TAP 转移不得被静默跳过",
+    "machineCheck": "events.any(kind==ILLEGAL_TRANSITION)"
+   },
+   "accepted": {
+    "conclusion": "边沿 40 处毛刺标记为非法转移，轨迹保留该点",
+    "hypothesis": "hyp-0"
+   },
+   "rejected": [
+    {
+     "conclusion": "丢弃毛刺边沿",
+     "reason": "非法转移必须显式保留"
+    }
+   ]
+  },
+  {
+   "name": "mapping-version-change",
+   "mutatedSource": "bsdl_mapping",
+   "fixture": "bsdl_mapping_u1_v2.json",
+   "compareTo": "bsdl-u1-v1",
+   "expectEvents": [
+    "MAPPING_VERSION_CHANGED"
+   ],
+   "judgment": {
+    "rule": "BSDL 映射版本变更只影响单元到引脚证据层",
+    "machineCheck": "events.any(kind==MAPPING_VERSION_CHANGED) && affected.all(stage==EVIDENCE)"
+   },
+   "accepted": {
+    "conclusion": "单元 1/3 引脚变化仅影响 EVIDENCE 阶段",
+    "hypothesis": "hyp-0"
+   },
+   "rejected": [
+    {
+     "conclusion": "全链重算",
+     "reason": "映射版本不影响 TAP 轨迹与链结构"
+    }
+   ]
+  }
+ ]
+}

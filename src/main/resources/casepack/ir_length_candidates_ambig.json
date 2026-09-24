@@ -1,0 +1,32 @@
+{
+ "id": "ircand-ambig",
+ "label": "IR 长度多解：u1/u3 候选来自 IDCODE 猜测，两种分解同长",
+ "perDevice": {
+  "u1": [
+   {
+    "length": 4,
+    "source": "BSDL"
+   },
+   {
+    "length": 5,
+    "source": "IDCODE_GUESS"
+   }
+  ],
+  "u2": [
+   {
+    "length": 4,
+    "source": "BSDL"
+   }
+  ],
+  "u3": [
+   {
+    "length": 8,
+    "source": "BSDL"
+   },
+   {
+    "length": 7,
+    "source": "IDCODE_GUESS"
+   }
+  ]
+ }
+}

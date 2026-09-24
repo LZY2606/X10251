@@ -1,0 +1,24 @@
+{
+ "id": "ircand-base",
+ "label": "基线 IR 长度候选（均来自 BSDL，唯一）",
+ "perDevice": {
+  "u1": [
+   {
+    "length": 4,
+    "source": "BSDL"
+   }
+  ],
+  "u2": [
+   {
+    "length": 4,
+    "source": "BSDL"
+   }
+  ],
+  "u3": [
+   {
+    "length": 8,
+    "source": "BSDL"
+   }
+  ]
+ }
+}

@@ -1,0 +1,20 @@
+{
+ "id": "bsdl-u3-v2",
+ "label": "u3 BSDL 引脚映射 v2.0",
+ "device": "u3",
+ "mappingVersion": "v2.0",
+ "cells": [
+  {
+   "cellIndex": 0,
+   "port": "D0",
+   "pin": "T1",
+   "function": "OUTPUT2"
+  },
+  {
+   "cellIndex": 1,
+   "port": "D1",
+   "pin": "T2",
+   "function": "INPUT"
+  }
+ ]
+}
