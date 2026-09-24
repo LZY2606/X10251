@@ -1,0 +1,62 @@
+# Replayable JTAG logic capture fixture; raw representation is preserved.
+SAMPLE source=CAP-001 format=jtag-logic-capture/v1 active_edge=rise time_basis=ns(origin=capture-trigger,precision=0.1ns)
+# Establish Test-Logic-Reset before any legal transfer.
+EDGE id=E:TLR:1 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:TLR:2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:TLR:3 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:TLR:4 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:TLR:5 edge=rise tms=1 tdi=0 tdo=0
+# Enter Run-Test/Idle.
+EDGE id=E:RTI:1 edge=rise tms=0 tdi=0 tdo=0
+# Move to Shift-IR: 1,1,0,0.
+EDGE id=E:SIR:1 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:SIR:2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:SIR:3 edge=rise tms=0 tdi=0 tdo=1
+EDGE id=E:SIR:4 edge=rise tms=0 tdi=0 tdo=1
+# U1=IDCODE 00110, U2=SAMPLE 00010, U3=SAMPLE 00001; chain order U1,U2,U3.
+SHIFT id=IR-BASE register=IR count=17 tdi=00110000100000100 tdo=11111111111111111
+# From Shift-IR exit/update, return to RTI: 1,1,0.
+EDGE id=E:UIR:1 edge=rise tms=1 tdi=0 tdo=1
+EDGE id=E:UIR:2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:DRRTI:1 edge=rise tms=0 tdi=0 tdo=0
+# To Shift-DR: 1,0,0.
+EDGE id=E:SDR:1 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:CDR:1 edge=rise tms=0 tdi=0 tdo=1
+EDGE id=E:CDR:2 edge=rise tms=0 tdi=0 tdo=1
+# 96-bit IDCODE read; U4 missing means only three present devices respond.
+SHIFT id=DR-IDCODE register=DR count=96 tdi=0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 tdo=0011000100000000000000000000000010010110000000000000000000000001100001100000000000000000000000000
+# Exit DR and return to RTI.
+EDGE id=E:UDR:1 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:UDR:2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:DRRTI:2 edge=rise tms=0 tdi=0 tdo=0
+# Issue BYPASS to all devices; three present devices give a three-bit bypass DR scan.
+EDGE id=E:SIRB:1 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:SIRB:2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:SIRB:3 edge=rise tms=0 tdi=0 tdo=1
+EDGE id=E:SIRB:4 edge=rise tms=0 tdi=0 tdo=1
+SHIFT id=IR-BYPASS register=IR count=17 tdi=11111111111111111 tdo=11111111111111111
+EDGE id=E:UIRB:1 edge=rise tms=1 tdi=0 tdo=1
+EDGE id=E:UIRB:2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:DRRTIB:1 edge=rise tms=0 tdi=0 tdo=0
+EDGE id=E:SDRB:1 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:CDRB:1 edge=rise tms=0 tdi=0 tdo=1
+EDGE id=E:CDRB:2 edge=rise tms=0 tdi=0 tdo=1
+SHIFT id=DR-BYPASS register=DR count=3 tdi=000 tdo=111
+EDGE id=E:UDRB:1 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:UDRB:2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:DRRTIB:2 edge=rise tms=0 tdi=0 tdo=0
+# Mid-scan reset during a partial IR scan. The reset source explicitly marks this as illegal to ignore silently.
+EDGE id=E:MID:SIR:1 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:MID:SIR:2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:MID:SIR:3 edge=rise tms=0 tdi=0 tdo=1
+EDGE id=E:MID:SIR:4 edge=rise tms=0 tdi=0 tdo=1
+SHIFT id=IR-PARTIAL register=IR count=4 tdi=0101 tdo=1010
+RESET_EDGE_HINT id=R-MID edge=auto:IR-PARTIAL:3 kind=trst mid_scan=true at=420.0ns
+EDGE id=E:MID:RESET edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:MID:RESET2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:MID:RTI edge=rise tms=0 tdi=0 tdo=0
+# Illegal transfer: TMS is sampled X before reset. It creates an explicit invalid transition.
+EDGE id=E:ILLEGAL:1 edge=rise tms=X tdi=0 tdo=0
+EDGE id=E:AFTER:RESET1 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:AFTER:RESET2 edge=rise tms=1 tdi=0 tdo=0
+EDGE id=E:AFTER:RTI edge=rise tms=0 tdi=0 tdo=0

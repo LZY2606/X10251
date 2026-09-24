@@ -1,0 +1,4 @@
+# Parameter revision fixture: same physical state encoding is represented on falling TCK edges.
+SAMPLE source=CAP-002 format=jtag-logic-capture/v1 active_edge=fall time_basis=ns(origin=capture-trigger,precision=0.1ns)
+EDGE id=E:FALL:TLR edge=fall tms=1 tdi=0 tdo=0
+EDGE id=E:FALL:RTI edge=fall tms=0 tdi=0 tdo=0

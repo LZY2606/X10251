@@ -1,0 +1,4 @@
+# Reset events are a separately stored direct source, not inferred silently.
+RESET id=R-POWER edge=E:TLR:1 kind=power_on mid_scan=false at=10.0ns source="power-on TMS sequence"
+RESET id=R-MID edge=E:IR-PARTIAL:3 kind=trst mid_scan=true at=420.0ns source="probe observed TRST asserted during Shift-IR"
+RESET id=R-AFTER-ILLEGAL edge=E:AFTER:RESET1 kind=trst mid_scan=false at=470.0ns source="recovery only after TMS=X was recorded"
